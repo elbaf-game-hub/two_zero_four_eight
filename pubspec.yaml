@@ -1,5 +1,11 @@
 name: two_zero_four_eight
 description: 2048 — Game Hub module.
+
+# Mobile bundle identifiers
+#   Android: applicationId = com.elbaftech.game_hub.two_zero_four_eight
+#   iOS:     CFBundleIdentifier = com.elbaftech.game_hub.two_zero_four_eight
+#   Apply with: ./tool/apply_bundle_ids.sh two_zero_four_eight
+#
 version: 0.1.0
 publish_to: none
 
