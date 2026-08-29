@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
-import 'package:game_module/game_module.dart';
+library two_zero_four_eight;
 
-part 'src/two_zero_four_eight_module.dart';
-part 'src/two_zero_four_eight_page.dart';
+export 'src/two_zero_four_eight_module.dart';
+export 'src/two_zero_four_eight_page.dart';
+export 'src/two_zero_four_eight_state.dart';
