@@ -282,34 +282,22 @@ class _TwoZeroFourEightPageState extends State<TwoZeroFourEightPage> {
       );
     }
 
-    final assetName = value <= 2048 ? 'tile_$value' : 'tile_super';
+    final textColor = value <= 4 ? const Color(0xFF776E65) : Colors.white;
+    final fontSize = value > 512 ? 20.0 : 26.0;
 
     return Container(
       decoration: BoxDecoration(
         color: _getFallbackColor(value),
         borderRadius: BorderRadius.circular(GameTokens.radiusMd),
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(GameTokens.radiusMd),
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            SvgPicture.asset(
-              'assets/svg/two_zero_four_eight/$assetName.svg',
-              package: 'game_assets',
-              fit: BoxFit.contain,
-            ),
-            Center(
-              child: Text(
-                '$value',
-                style: TextStyle(
-                  fontSize: value > 512 ? 20 : 26,
-                  fontWeight: FontWeight.w900,
-                  color: value <= 4 ? const Color(0xFF776E65) : Colors.white,
-                ),
-              ),
-            ),
-          ],
+      child: Center(
+        child: Text(
+          '$value',
+          style: TextStyle(
+            fontSize: fontSize,
+            fontWeight: FontWeight.w900,
+            color: textColor,
+          ),
         ),
       ),
     );
