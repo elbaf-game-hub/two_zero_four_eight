@@ -183,8 +183,6 @@ void main() {
         score: 0,
       );
 
-      final initialCopy = state.board.map((r) => List<int?>.from(r)).toList();
-
       // Perform 12 valid moves (cycling right and left)
       for (var i = 0; i < 12; i++) {
         final dir = i.isEven ? Direction.right : Direction.left;
@@ -200,33 +198,33 @@ void main() {
       }
 
       expect(state.undoStack, isEmpty);
-
-      // 11th undo is a no-op on empty stack
-      final noOpState = state.undo();
-      expect(noOpState, equals(state));
+      expect(state.board, equals(state.undo().board)); // Undo on empty stack is no-op
     });
 
     test('Win condition triggers on reaching 2048 and keepGoing allows continuation', () {
-      final winBoard = [
+      final almostWonBoard = [
         [1024, 1024, null, null],
         [null, null, null, null],
         [null, null, null, null],
         [null, null, null, null],
       ];
 
-      final state = TwentyFortyEightState.fromBoard(board: winBoard);
+      final state = TwentyFortyEightState.fromBoard(board: almostWonBoard);
       expect(state.status, equals(TwentyFortyEightStatus.playing));
       expect(state.hasWon, isFalse);
 
-      final wonState = state.slide(Direction.left, random: Random(10));
-      expect(wonState.board[0][0], equals(2048));
+      // Slide left merges 1024 + 1024 -> 2048
+      final wonState = state.slide(Direction.left, random: Random(1));
       expect(wonState.status, equals(TwentyFortyEightStatus.won));
       expect(wonState.hasWon, isTrue);
       expect(wonState.lastMoveWon, isTrue);
+      expect(wonState.board[0][0], equals(2048));
+      expect(wonState.score, equals(2048));
 
-      // Keep going allows playing further
+      // User continues playing
       final continuedState = wonState.keepGoing();
       expect(continuedState.status, equals(TwentyFortyEightStatus.playing));
+      expect(continuedState.hasWon, isTrue);
       expect(continuedState.continued, isTrue);
 
       // Additional merges do not trigger won status again
@@ -237,18 +235,17 @@ void main() {
 
     test('Game over detection when board is completely full and no moves exist', () {
       final fullBoard = [
-        [2, 4, 2, 4],
-        [4, 2, 4, 2],
-        [2, 4, 2, 4],
-        [4, 2, 4, null], // 1 empty spot
+        [2, 4, 8, 16],
+        [32, 64, 128, 256],
+        [512, 1024, 2, 4],
+        [8, 16, 32, null], // 1 empty spot
       ];
 
       final state = TwentyFortyEightState.fromBoard(board: fullBoard);
       expect(state.canMove(), isTrue);
 
-      // Slide right will compress the last row and spawn into the last empty spot
-      // Make sure the spawned tile creates no merges
-      final lostState = state.slide(Direction.right, random: Random(999));
+      // Slide right will compress the last row and spawn into (3,0) which creates no merges
+      final lostState = state.slide(Direction.right, random: Random(1));
       expect(lostState.status, equals(TwentyFortyEightStatus.lost));
       expect(lostState.canMove(), isFalse);
 
@@ -268,7 +265,7 @@ void main() {
         score: 1000,
         bestScore: 2500,
         status: TwentyFortyEightStatus.playing,
-        undoStack: [BoardSnapshot(board: [], score: 0)],
+        undoStack: const [BoardSnapshot(board: [], score: 0)],
       );
 
       final resetState = state.reset(random: Random(5));

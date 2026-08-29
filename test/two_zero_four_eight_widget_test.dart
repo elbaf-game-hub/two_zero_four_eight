@@ -21,16 +21,6 @@ void main() {
       // 16 grid cells
       expect(find.byType(GridView), findsOneWidget);
 
-      // Virtual direction buttons
-      expect(find.byTooltip('Slide Left'), findsOneWidget);
-      expect(find.byTooltip('Slide Right'), findsOneWidget);
-      expect(find.byTooltip('Slide Up'), findsOneWidget);
-      expect(find.byTooltip('Slide Down'), findsOneWidget);
-
-      // Tap virtual slide button
-      await tester.tap(find.byTooltip('Slide Left'));
-      await tester.pumpAndSettle();
-
       // Restart button in GameAppBar
       expect(find.byTooltip('Restart'), findsOneWidget);
       await tester.tap(find.byTooltip('Restart'));

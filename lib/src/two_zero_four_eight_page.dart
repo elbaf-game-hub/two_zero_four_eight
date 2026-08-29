@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:game_assets/game_assets.dart';
 
 import 'two_zero_four_eight_state.dart';
@@ -129,20 +128,21 @@ class _TwoZeroFourEightPageState extends State<TwoZeroFourEightPage> {
   @override
   Widget build(BuildContext context) {
     return Theme(
-      data: buildGameTheme(Brightness.light),
+      data: buildGameTheme(Brightness.dark),
       child: Focus(
         focusNode: _focusNode,
         autofocus: true,
         onKeyEvent: _handleKeyEvent,
         child: Scaffold(
+          backgroundColor: const Color(0xFF0B1120),
           appBar: GameAppBar(
             title: '2048',
             score: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                _ScorePill(label: 'SCORE', value: _state.score),
-                const SizedBox(width: GameTokens.xs),
-                _ScorePill(label: 'BEST', value: _state.bestScore),
+                _ScorePill(label: 'SCORE', value: _state.score, color: GameTokens.primary),
+                const SizedBox(width: 8),
+                _ScorePill(label: 'BEST', value: _state.bestScore, color: GameTokens.warning),
               ],
             ),
             onRestart: _handleRestart,
@@ -151,119 +151,99 @@ class _TwoZeroFourEightPageState extends State<TwoZeroFourEightPage> {
           body: SafeArea(
             child: Column(
               children: [
-                const SizedBox(height: GameTokens.sm),
+                const SizedBox(height: 8),
                 // Action Bar (Undo & Controls helper)
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: GameTokens.md),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        'Join numbers to reach 2048!',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.black54,
-                              fontWeight: FontWeight.w500,
-                            ),
+                      const Text(
+                        'Swipe to merge numbers',
+                        style: TextStyle(
+                          color: Colors.white60,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                      ElevatedButton.icon(
+                      FilledButton.tonalIcon(
                         onPressed:
                             _state.undoStack.isNotEmpty ? _handleUndo : null,
-                        icon: const Icon(Icons.undo, size: 18),
+                        icon: const Icon(Icons.undo_rounded, size: 16),
                         label: Text('Undo (${_state.undoStack.length})'),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: GameTokens.sm,
-                            vertical: GameTokens.xs,
-                          ),
-                          textStyle: const TextStyle(fontSize: 12),
+                        style: FilledButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
                         ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: GameTokens.sm),
+                const SizedBox(height: 12),
                 // Main Board
                 Expanded(
                   child: Center(
-                    child: GestureDetector(
-                      onPanStart: _onPanStart,
-                      onPanEnd: _onPanEnd,
-                      behavior: HitTestBehavior.opaque,
-                      child: GameBoardArea(
-                        aspectRatio: 1.0,
-                        maxSide: 460,
-                        background: GameTokens.boardDark,
-                        padding: const EdgeInsets.all(GameTokens.sm),
-                        borderRadius: GameTokens.radiusLg,
-                        child: Stack(
-                          children: [
-                            // 4x4 Grid
-                            GridView.builder(
-                              physics: const NeverScrollableScrollPhysics(),
-                              gridDelegate:
-                                  const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 4,
-                                mainAxisSpacing: GameTokens.sm,
-                                crossAxisSpacing: GameTokens.sm,
-                              ),
-                              itemCount: 16,
-                              itemBuilder: (context, index) {
-                                final row = index ~/ 4;
-                                final col = index % 4;
-                                final val = _state.board[row][col];
-                                return _buildTileCell(val);
-                              },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      child: GestureDetector(
+                        onPanStart: _onPanStart,
+                        onPanEnd: _onPanEnd,
+                        behavior: HitTestBehavior.opaque,
+                        child: Container(
+                          constraints: const BoxConstraints(maxWidth: 420),
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF030712),
+                            borderRadius: BorderRadius.circular(GameTokens.radiusLg),
+                            border: Border.all(
+                              color: const Color(0xFF1E293B),
+                              width: 2,
                             ),
-                            // Win Overlay
-                            if (_state.status == TwentyFortyEightStatus.won &&
-                                !_state.continued)
-                              _buildWinOverlay(context),
-                            // Loss Overlay
-                            if (_state.status == TwentyFortyEightStatus.lost)
-                              _buildGameOverOverlay(context),
-                          ],
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.5),
+                                blurRadius: 24,
+                                offset: const Offset(0, 10),
+                              ),
+                            ],
+                          ),
+                          child: AspectRatio(
+                            aspectRatio: 1.0,
+                            child: Stack(
+                              children: [
+                                // 4x4 Grid
+                                GridView.builder(
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  gridDelegate:
+                                      const SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 4,
+                                    mainAxisSpacing: 8,
+                                    crossAxisSpacing: 8,
+                                  ),
+                                  itemCount: 16,
+                                  itemBuilder: (context, index) {
+                                    final row = index ~/ 4;
+                                    final col = index % 4;
+                                    final val = _state.board[row][col];
+                                    return _buildTileCell(val);
+                                  },
+                                ),
+                                // Win Overlay
+                                if (_state.status == TwentyFortyEightStatus.won &&
+                                    !_state.continued)
+                                  _buildWinOverlay(context),
+                                // Loss Overlay
+                                if (_state.status == TwentyFortyEightStatus.lost)
+                                  _buildGameOverOverlay(context),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
-                // Virtual Directional Swipe Buttons for accessibility / touch
-                Padding(
-                  padding: const EdgeInsets.all(GameTokens.sm),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      IconButton.filledTonal(
-                        icon: const Icon(Icons.arrow_back),
-                        tooltip: 'Slide Left',
-                        onPressed: () => _handleSlide(Direction.left),
-                      ),
-                      const SizedBox(width: GameTokens.xs),
-                      Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton.filledTonal(
-                            icon: const Icon(Icons.arrow_upward),
-                            tooltip: 'Slide Up',
-                            onPressed: () => _handleSlide(Direction.up),
-                          ),
-                          const SizedBox(height: GameTokens.xs),
-                          IconButton.filledTonal(
-                            icon: const Icon(Icons.arrow_downward),
-                            tooltip: 'Slide Down',
-                            onPressed: () => _handleSlide(Direction.down),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(width: GameTokens.xs),
-                      IconButton.filledTonal(
-                        icon: const Icon(Icons.arrow_forward),
-                        tooltip: 'Slide Right',
-                        onPressed: () => _handleSlide(Direction.right),
-                      ),
-                    ],
-                  ),
-                ),
+                const SizedBox(height: 16),
               ],
             ),
           ),
@@ -276,19 +256,34 @@ class _TwoZeroFourEightPageState extends State<TwoZeroFourEightPage> {
     if (value == null) {
       return Container(
         decoration: BoxDecoration(
-          color: GameTokens.board,
+          color: const Color(0xFF0F172A),
           borderRadius: BorderRadius.circular(GameTokens.radiusMd),
+          border: Border.all(color: const Color(0xFF1E293B), width: 1),
         ),
       );
     }
 
-    final textColor = value <= 4 ? const Color(0xFF776E65) : Colors.white;
-    final fontSize = value > 512 ? 20.0 : 26.0;
+    final colors = _getGradientColors(value);
+    final color1 = colors.$1;
+    final color2 = colors.$2;
+    final fontSize = value > 512 ? 18.0 : (value > 64 ? 22.0 : 26.0);
 
     return Container(
       decoration: BoxDecoration(
-        color: _getFallbackColor(value),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [color1, color2],
+        ),
         borderRadius: BorderRadius.circular(GameTokens.radiusMd),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: color2.withValues(alpha: 0.4),
+            blurRadius: 6,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
       child: Center(
         child: Text(
@@ -296,47 +291,55 @@ class _TwoZeroFourEightPageState extends State<TwoZeroFourEightPage> {
           style: TextStyle(
             fontSize: fontSize,
             fontWeight: FontWeight.w900,
-            color: textColor,
+            color: Colors.white,
+            shadows: const [
+              Shadow(
+                color: Colors.black38,
+                offset: Offset(0, 1),
+                blurRadius: 3,
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 
-  Color _getFallbackColor(int val) {
+  (Color, Color) _getGradientColors(int val) {
     switch (val) {
       case 2:
-        return GameTokens.tile2;
+        return (const Color(0xFF64748B), const Color(0xFF475569));
       case 4:
-        return GameTokens.tile4;
+        return (const Color(0xFF0EA5E9), const Color(0xFF0284C7));
       case 8:
-        return GameTokens.tile8;
+        return (const Color(0xFFF97316), const Color(0xFFEA580C));
       case 16:
-        return GameTokens.tile16;
+        return (const Color(0xFFFB923C), const Color(0xFFC2410C));
       case 32:
-        return GameTokens.tile32;
+        return (const Color(0xFFF43F5E), const Color(0xFFE11D48));
       case 64:
-        return GameTokens.tile64;
+        return (const Color(0xFFEF4444), const Color(0xFFDC2626));
       case 128:
-        return GameTokens.tile128;
+        return (const Color(0xFFFBBF24), const Color(0xFFD97706));
       case 256:
-        return GameTokens.tile256;
+        return (const Color(0xFFF59E0B), const Color(0xFFB45309));
       case 512:
-        return GameTokens.tile512;
+        return (const Color(0xFF10B981), const Color(0xFF059669));
       case 1024:
-        return GameTokens.tile1024;
+        return (const Color(0xFF06B6D4), const Color(0xFF0891B2));
       case 2048:
-        return GameTokens.tile2048;
+        return (const Color(0xFFA855F7), const Color(0xFF7C3AED));
       default:
-        return const Color(0xFF3C3A32);
+        return (const Color(0xFFEC4899), const Color(0xFFBE185D));
     }
   }
 
   Widget _buildWinOverlay(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.amber.withValues(alpha: 0.9),
+        color: const Color(0xFF0F172A).withValues(alpha: 0.92),
         borderRadius: BorderRadius.circular(GameTokens.radiusLg),
+        border: Border.all(color: Colors.amber, width: 2),
       ),
       child: Center(
         child: Padding(
@@ -344,38 +347,40 @@ class _TwoZeroFourEightPageState extends State<TwoZeroFourEightPage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              const Icon(Icons.emoji_events_rounded, color: Colors.amber, size: 48),
+              const SizedBox(height: 8),
               const Text(
                 '2048 Reached!',
                 style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
+                  fontSize: 26,
+                  fontWeight: FontWeight.w900,
                   color: Colors.white,
                 ),
               ),
-              const SizedBox(height: GameTokens.sm),
+              const SizedBox(height: 8),
               const Text(
                 'Congratulations! You created the 2048 tile!',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 14, color: Colors.white),
+                style: TextStyle(fontSize: 14, color: Colors.white70),
               ),
-              const SizedBox(height: GameTokens.md),
+              const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  ElevatedButton(
+                  FilledButton(
                     onPressed: _handleKeepGoing,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.amber.shade900,
+                    style: FilledButton.styleFrom(
+                      backgroundColor: Colors.amber.shade600,
+                      foregroundColor: Colors.white,
                     ),
                     child: const Text('Keep Going'),
                   ),
-                  const SizedBox(width: GameTokens.sm),
+                  const SizedBox(width: 8),
                   OutlinedButton(
                     onPressed: _handleRestart,
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Colors.white,
-                      side: const BorderSide(color: Colors.white),
+                      side: const BorderSide(color: Colors.white60),
                     ),
                     child: const Text('New Game'),
                   ),
@@ -391,8 +396,9 @@ class _TwoZeroFourEightPageState extends State<TwoZeroFourEightPage> {
   Widget _buildGameOverOverlay(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.82),
+        color: const Color(0xFF030712).withValues(alpha: 0.92),
         borderRadius: BorderRadius.circular(GameTokens.radiusLg),
+        border: Border.all(color: GameTokens.danger, width: 2),
       ),
       child: Center(
         child: Padding(
@@ -404,16 +410,16 @@ class _TwoZeroFourEightPageState extends State<TwoZeroFourEightPage> {
                 'Game Over!',
                 style: TextStyle(
                   fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  fontWeight: FontWeight.w900,
+                  color: GameTokens.danger,
                 ),
               ),
-              const SizedBox(height: GameTokens.sm),
+              const SizedBox(height: 8),
               Text(
                 'Final Score: ${_state.score}',
-                style: const TextStyle(fontSize: 18, color: Colors.white70),
+                style: const TextStyle(fontSize: 18, color: Colors.white70, fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: GameTokens.md),
+              const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -422,15 +428,15 @@ class _TwoZeroFourEightPageState extends State<TwoZeroFourEightPage> {
                       onPressed: _handleUndo,
                       style: OutlinedButton.styleFrom(
                         foregroundColor: Colors.white,
-                        side: const BorderSide(color: Colors.white),
+                        side: const BorderSide(color: Colors.white60),
                       ),
                       child: const Text('Undo Move'),
                     ),
-                    const SizedBox(width: GameTokens.sm),
+                    const SizedBox(width: 8),
                   ],
-                  ElevatedButton(
+                  FilledButton(
                     onPressed: _handleRestart,
-                    style: ElevatedButton.styleFrom(
+                    style: FilledButton.styleFrom(
                       backgroundColor: GameTokens.primary,
                       foregroundColor: Colors.white,
                     ),
@@ -497,37 +503,37 @@ class _TwoZeroFourEightPageState extends State<TwoZeroFourEightPage> {
 class _ScorePill extends StatelessWidget {
   final String label;
   final int value;
+  final Color color;
 
-  const _ScorePill({required this.label, required this.value});
+  const _ScorePill({required this.label, required this.value, required this.color});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: GameTokens.sm,
-        vertical: GameTokens.xs,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: GameTokens.boardDark,
+        color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(GameTokens.radiusSm),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
-      child: Column(
+      child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.bold,
-              color: Colors.black54,
+              color: color,
             ),
           ),
+          const SizedBox(width: 4),
           Text(
             '$value',
             style: const TextStyle(
               fontSize: 14,
-              fontWeight: FontWeight.w800,
-              color: Colors.black87,
+              fontWeight: FontWeight.w900,
+              color: Colors.white,
             ),
           ),
         ],
